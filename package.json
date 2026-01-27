@@ -19,8 +19,14 @@
   },
   "homepage": "https://github.com/rrcw2025singh/Back_end_assignment_02#readme",
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "morgan": "^1.10.1"
   }
 }
