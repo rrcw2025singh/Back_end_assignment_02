@@ -17,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/rrcw2025singh/Back_end_assignment_02/issues"
   },
-  "homepage": "https://github.com/rrcw2025singh/Back_end_assignment_02#readme"
+  "homepage": "https://github.com/rrcw2025singh/Back_end_assignment_02#readme",
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
 }
