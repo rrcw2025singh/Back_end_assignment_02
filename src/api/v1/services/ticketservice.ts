@@ -1,4 +1,4 @@
-import type { Ticket, CreateTicketData, UpdateTicketData } from "../models/ticketModels";
+import type { Ticket, CreateTicketData, UpdateTicketData, TicketPriority } from "../models/ticketModels";
 
 
 // In-memory storage for demo purposes
@@ -96,3 +96,52 @@ export const deleteTicket = async (id: string): Promise<boolean> => {
   tickets.splice(index, 1);
   return true;
 };
+
+const PRIORITY_BASE: Record<TicketPriority, number> = {
+  critical: 50,
+  high: 30,
+  medium: 20,
+  low: 10,
+};
+
+// TODO: update these after watching your demo video carefully
+const AGE_MULTIPLIER_PER_DAY = 1; // you will change this
+const THRESHOLDS = {
+  LOW_MAX: 39,
+  MEDIUM_MAX: 69,
+  HIGH_MAX: 99,
+};
+
+const daysOld = (createdAt: Date): number => {
+  const diffMs = Date.now() - createdAt.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+};
+
+export type UrgencyLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export interface UrgencyResult {
+  score: number;
+  level: UrgencyLevel;
+  message: string;
+}
+
+/**
+ * Calculates urgency score and level for a ticket
+ */
+export const calculateUrgency = async (ticket: Ticket): Promise<UrgencyResult> => {
+  // Demo might treat resolved tickets differently — update if needed after video
+  if (ticket.status === "resolved") {
+    const base = PRIORITY_BASE[ticket.priority];
+    return { score: base, level: "LOW", message: "LOW" };
+  }
+
+  const base = PRIORITY_BASE[ticket.priority];
+  const age = daysOld(ticket.createdAt);
+  const score = base + age * AGE_MULTIPLIER_PER_DAY;
+
+  if (score <= THRESHOLDS.LOW_MAX) return { score, level: "LOW", message: "LOW" };
+  if (score <= THRESHOLDS.MEDIUM_MAX) return { score, level: "MEDIUM", message: "MEDIUM" };
+  if (score <= THRESHOLDS.HIGH_MAX) return { score, level: "HIGH", message: "HIGH" };
+  return { score, level: "CRITICAL", message: "CRITICAL" };
+};
+
