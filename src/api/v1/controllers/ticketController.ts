@@ -101,3 +101,18 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+export const deleteTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await ticketService.deleteTicket(id);
+    if (!deleted) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      return;
+    }
+
+    res.status(HTTP_STATUS.OK).json({ message: "Ticket deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
