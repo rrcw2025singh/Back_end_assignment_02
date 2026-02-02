@@ -67,3 +67,37 @@ export const getTicketById = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+export const updateTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { priority, status } = req.body;
+
+    // Required validation messages:
+    if (priority !== undefined && !VALID_PRIORITIES.includes(priority)) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Invalid priority. Must be one of: critical, high, medium, low",
+      });
+      return;
+    }
+
+    if (status !== undefined && !VALID_STATUSES.includes(status)) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: "Invalid status. Must be one of: open, in-progress, resolved",
+      });
+      return;
+    }
+
+    const updated = await ticketService.updateTicket(id, req.body);
+    if (!updated) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      return;
+    }
+
+    res.status(HTTP_STATUS.OK).json({
+      message: "Ticket updated successfully",
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
