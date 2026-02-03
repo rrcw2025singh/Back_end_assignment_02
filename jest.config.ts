@@ -7,7 +7,7 @@ module.exports = {
   testEnvironment: "node",
 
   // Tell Jest where the tests are
-  roots: ["<rootDir>/tests"],
+  roots: ["<rootDir>/test"],
 
   // Specify the pattern for test files
   testMatch: ["**/*.test.ts"],

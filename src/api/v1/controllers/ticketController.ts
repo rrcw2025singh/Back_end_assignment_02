@@ -116,3 +116,26 @@ export const deleteTicket = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
+export const getTicketUrgency = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const ticket = await ticketService.getTicketById(id);
+    if (!ticket) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      return;
+    }
+
+    const urgency = await ticketService.calculateUrgency(ticket);
+
+    res.status(HTTP_STATUS.OK).json({
+      message: "Ticket urgency calculated successfully",
+      data: {
+        ...ticket,
+        urgency,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
