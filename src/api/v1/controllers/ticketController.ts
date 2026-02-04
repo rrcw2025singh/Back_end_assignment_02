@@ -1,14 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import { HTTP_STATUS } from "../../../constants/httpConstants";
-import * as ticketService from "../services/ticketService";
-import type { TicketPriority, TicketStatus } from "../models/ticketModels";
+import * as ticketService from "../services/ticketservice";
 import type { TicketPriority, TicketStatus } from "../models/ticketModels";
 
 
 const VALID_PRIORITIES: TicketPriority[] = ["critical", "high", "medium", "low"];
 const VALID_STATUSES: TicketStatus[] = ["open", "in-progress", "resolved"];
 
-export const getAllTickets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAllTickets = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const tickets = await ticketService.getAllTickets();
     res.status(HTTP_STATUS.OK).json({
@@ -20,19 +23,33 @@ export const getAllTickets = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const createTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createTicket = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const { title, description, priority } = req.body;
+    const { title, description, priority } = req.body as {
+      title?: string;
+      description?: string;
+      priority?: TicketPriority;
+    };
 
-    // REQUIRED assignment messages:
+    // Required messages (rubric)
     if (!title) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Missing required field: title" });
+      res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ message: "Missing required field: title" });
       return;
     }
+
     if (!description) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Missing required field: description" });
+      res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .json({ message: "Missing required field: description" });
       return;
     }
+
     if (!priority || !VALID_PRIORITIES.includes(priority)) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         message: "Invalid priority. Must be one of: critical, high, medium, low",
@@ -40,7 +57,12 @@ export const createTicket = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    const newTicket = await ticketService.createTicket({ title, description, priority });
+    const newTicket = await ticketService.createTicket({
+      title,
+      description,
+      priority,
+    });
+
     res.status(HTTP_STATUS.CREATED).json({
       message: "Ticket created successfully",
       data: newTicket,
@@ -49,13 +71,21 @@ export const createTicket = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
-export const getTicketById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+export const getTicketById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
 
     const ticket = await ticketService.getTicketById(id);
+
     if (!ticket) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: "Ticket not found" });
       return;
     }
 
@@ -67,12 +97,22 @@ export const getTicketById = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
-export const updateTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+export const updateTicket = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
-    const { priority, status } = req.body;
+    const { title, description, priority, status } = req.body as {
+      title?: string;
+      description?: string;
+      priority?: TicketPriority;
+      status?: TicketStatus;
+    };
 
-    // Required validation messages:
+    // Required validation (rubric)
     if (priority !== undefined && !VALID_PRIORITIES.includes(priority)) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({
         message: "Invalid priority. Must be one of: critical, high, medium, low",
@@ -87,9 +127,18 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
       return;
     }
 
-    const updated = await ticketService.updateTicket(id, req.body);
+    // Only pass allowed fields to service (cleaner + safer)
+    const updated = await ticketService.updateTicket(id, {
+      title,
+      description,
+      priority,
+      status,
+    });
+
     if (!updated) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: "Ticket not found" });
       return;
     }
 
@@ -101,28 +150,46 @@ export const updateTicket = async (req: Request, res: Response, next: NextFuncti
     next(error);
   }
 };
-export const deleteTicket = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+export const deleteTicket = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
 
     const deleted = await ticketService.deleteTicket(id);
+
     if (!deleted) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: "Ticket not found" });
       return;
     }
 
-    res.status(HTTP_STATUS.OK).json({ message: "Ticket deleted successfully" });
+    res.status(HTTP_STATUS.OK).json({
+      message: "Ticket deleted successfully",
+    });
   } catch (error) {
     next(error);
   }
 };
-export const getTicketUrgency = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+export const getTicketUrgency = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.params;
 
     const ticket = await ticketService.getTicketById(id);
+
     if (!ticket) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({ message: "Ticket not found" });
+      res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: "Ticket not found" });
       return;
     }
 

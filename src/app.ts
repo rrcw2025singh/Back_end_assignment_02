@@ -1,6 +1,8 @@
 // import the express application and type definition
 import express, { Express, Request, Response, NextFunction } from "express";
 import { HTTP_STATUS } from "./constants/httpConstants";
+import ticketRoutes from "./api/v1/routes/ticketRoutes";
+
 // import morgan for logging
 import morgan from "morgan";
 
@@ -20,6 +22,8 @@ app.use(morgan("combined"));
 // Middleware for parsing JSON.
 app.use(express.json());
 
+// Added the route registration 
+app.use("/api/v1/tickets", ticketRoutes);
 // Basic routes
 app.get("/", (req, res) => {
   res.send("Hello, world!");
